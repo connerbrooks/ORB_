@@ -24,7 +24,19 @@
 #include <vector>
 #include <list>
 #include <opencv/cv.h>
+#include <opencv2/cudafeatures2d.hpp>
 
+/*
+#include <vector>
+#include <list>
+//#include <opencv/cv.h>
+#include<opencv2/core.hpp>
+//#include <opencv2/features2d/features2d.hpp>
+
+using namespace std;
+//#include <opencv2/gpu/gpu.hpp>
+#include <opencv2/cudafeatures2d.hpp>
+ */
 
 namespace ORB_SLAM2
 {
@@ -108,6 +120,10 @@ protected:
     std::vector<float> mvInvScaleFactor;    
     std::vector<float> mvLevelSigma2;
     std::vector<float> mvInvLevelSigma2;
+
+    // GPU implementation
+    //cv::gpu::ORB_GPU orb;
+    cv::Ptr<cv::cuda::ORB> orb;
 };
 
 } //namespace ORB_SLAM

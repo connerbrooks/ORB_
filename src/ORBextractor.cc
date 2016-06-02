@@ -54,6 +54,7 @@
 */
 
 
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -61,6 +62,8 @@
 #include <vector>
 
 #include "ORBextractor.h"
+
+
 
 
 using namespace cv;
@@ -412,6 +415,11 @@ ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
     nfeatures(_nfeatures), scaleFactor(_scaleFactor), nlevels(_nlevels),
     iniThFAST(_iniThFAST), minThFAST(_minThFAST)
 {
+    // gpu constructor
+    // todo figure out what we actually want for the FAST thresholds                              V here
+    orb = cv::cuda::ORB::create(nfeatures, scaleFactor, nlevels, 31, 0, 2, ORB::HARRIS_SCORE, 31, 20, true);
+
+
     mvScaleFactor.resize(nlevels);
     mvLevelSigma2.resize(nlevels);
     mvScaleFactor[0]=1.0f;
@@ -1046,8 +1054,29 @@ void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPo
     if(_image.empty())
         return;
 
+
     Mat image = _image.getMat();
+    Mat mask = _mask.getMat();
     assert(image.type() == CV_8UC1 );
+
+    cv::cuda::GpuMat g_image;
+    g_image.upload(_image);
+    cv::cuda::GpuMat g_mask;
+    //g_mask.upload(_mask);
+    cv::cuda::GpuMat g_descriptors;
+    //g_descriptors.upload(_descriptors);
+
+    //cv::cuda::GpuMat g_descriptors = _descriptors.getGpuMat();
+
+    //orb->detectAndCompute(g_image, g_mask, _keypoints, g_descriptors);
+    orb->detectAndCompute(g_image, g_mask, _keypoints, g_descriptors);
+
+    g_descriptors.download(_descriptors);
+    //g_descriptors.upload(_descriptors.getMat());
+
+
+
+    /*
 
     // Pre-compute the scale pyramid
     ComputePyramid(image);
@@ -1102,6 +1131,7 @@ void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPo
         // And add the keypoints to the output
         _keypoints.insert(_keypoints.end(), keypoints.begin(), keypoints.end());
     }
+     */
 }
 
 void ORBextractor::ComputePyramid(cv::Mat image)

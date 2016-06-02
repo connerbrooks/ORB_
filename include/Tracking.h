@@ -24,6 +24,7 @@
 
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
+//#include<opencv2/gpu/gpu.hpp>
 
 #include"Viewer.h"
 #include"FrameDrawer.h"
@@ -157,6 +158,12 @@ protected:
     //ORB
     ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
     ORBextractor* mpIniORBextractor;
+
+    // GPU ORB
+    //gpu::ORB_GPU orb;
+    //gpu::GpuMat keypoints1;
+    //gpu::GpuMat keypoints2;
+
 
     //BoW
     ORBVocabulary* mpORBVocabulary;

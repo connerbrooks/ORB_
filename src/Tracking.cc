@@ -21,8 +21,10 @@
 
 #include "Tracking.h"
 
+#include<opencv2/opencv.hpp>
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
+#include<opencv2/gpu/gpu.hpp>
 
 #include"ORBmatcher.h"
 #include"FrameDrawer.h"
@@ -123,6 +125,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
 
     if(sensor==System::MONOCULAR)
         mpIniORBextractor = new ORBextractor(2*nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);
+        //orb = cv::gpu::ORB_GPU(2*nFeatures, nLevels, nLevels);
 
     cout << endl  << "ORB Extractor Parameters: " << endl;
     cout << "- Number of Features: " << nFeatures << endl;
