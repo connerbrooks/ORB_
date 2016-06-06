@@ -25,6 +25,7 @@
 #include<vector>
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
+#include <opencv2/cudafeatures2d.hpp>
 
 #include"MapPoint.h"
 #include"KeyFrame.h"
@@ -99,6 +100,9 @@ protected:
 
     float mfNNratio;
     bool mbCheckOrientation;
+
+    cv::Ptr<cv::cuda::DescriptorMatcher> matcher;
+
 };
 
 }// namespace ORB_SLAM

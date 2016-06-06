@@ -24,6 +24,8 @@
 
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
+#include <opencv2/cudafeatures2d.hpp>
+
 
 #include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
 
@@ -40,6 +42,7 @@ const int ORBmatcher::HISTO_LENGTH = 30;
 
 ORBmatcher::ORBmatcher(float nnratio, bool checkOri): mfNNratio(nnratio), mbCheckOrientation(checkOri)
 {
+    matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 }
 
 int ORBmatcher::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoints, const float th)
@@ -1329,6 +1332,22 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
 {
     int nmatches = 0;
 
+    cv::cuda::GpuMat d_query, d_train;
+    d_query.upload(CurrentFrame.mDescriptors); 
+    d_train.upload(LastFrame.mDescriptors); 
+
+    std::vector<cv::DMatch> matches;
+    matcher->match(d_query, d_train, matches);
+
+    // fill matches
+    for (int i = 0; i < matches.size(); ++i) {
+      MapPoint* pMP = LastFrame.mvpMapPoints[matches[i].trainIdx];
+      CurrentFrame.mvpMapPoints[matches[i].queryIdx]=pMP;
+    }
+
+    return matches.size();
+
+    /*
     // Rotation Histogram (to check rotation consistency)
     vector<int> rotHist[HISTO_LENGTH];
     for(int i=0;i<HISTO_LENGTH;i++)
@@ -1467,6 +1486,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
     }
 
     return nmatches;
+    */
 }
 
 int ORBmatcher::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set<MapPoint*> &sAlreadyFound, const float th , const int ORBdist)
