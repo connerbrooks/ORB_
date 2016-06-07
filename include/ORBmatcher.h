@@ -101,8 +101,10 @@ protected:
     float mfNNratio;
     bool mbCheckOrientation;
 
-    cv::Ptr<cv::cuda::DescriptorMatcher> matcher;
+    bool mbCuda = false; // use cuda BF matcher
 
+    cv::Ptr<cv::cuda::DescriptorMatcher> matcher;
+    cv::FlannBasedMatcher f_matcher;
 };
 
 }// namespace ORB_SLAM
