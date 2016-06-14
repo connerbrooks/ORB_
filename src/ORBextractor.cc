@@ -1063,15 +1063,21 @@ void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPo
     g_image.upload(_image);
     cv::cuda::GpuMat g_mask;
     //g_mask.upload(_mask);
+    cv::cuda::GpuMat g_keypoints;
+    //g_keypoints.upload(_keypoints);
     cv::cuda::GpuMat g_descriptors;
     //g_descriptors.upload(_descriptors);
 
     //cv::cuda::GpuMat g_descriptors = _descriptors.getGpuMat();
 
     //orb->detectAndCompute(g_image, g_mask, _keypoints, g_descriptors);
-    orb->detectAndCompute(g_image, g_mask, _keypoints, g_descriptors);
+    cv::cuda::Stream s = cv::cuda::Stream();
+    orb->detectAndComputeAsync(g_image, g_mask, g_keypoints, g_descriptors, false, s);
+    s.waitForCompletion();
 
     g_descriptors.download(_descriptors);
+    //g_keypoints.download(_keypoints);
+    orb->convert(g_keypoints, _keypoints);
     //g_descriptors.upload(_descriptors.getMat());
 
 
